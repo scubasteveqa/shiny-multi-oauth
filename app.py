@@ -171,7 +171,7 @@ def server(i: Inputs, o: Outputs, session: Session):
 
         # Fetch Snowflake
         try:
-            sf_creds = client.oauth.get_credentials(session_token, integration_id=sf_integration_id)
+            sf_creds = client.oauth.get_credentials(session_token, audience=sf_integration_id)
             df_sf = fetch_snowflake(sf_creds["access_token"])
             sf_data.set(df_sf)
 
@@ -186,7 +186,7 @@ def server(i: Inputs, o: Outputs, session: Session):
 
         # Fetch Databricks
         try:
-            db_creds = client.oauth.get_credentials(session_token, integration_id=db_integration_id)
+            db_creds = client.oauth.get_credentials(session_token, audience=db_integration_id)
             df_db = fetch_databricks(db_creds["access_token"])
             db_data.set(df_db)
 
