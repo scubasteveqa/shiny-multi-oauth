@@ -20,8 +20,6 @@ import plotly.express as px
 import plotly.graph_objects as go
 import snowflake.connector
 from databricks import sql as dbsql
-from databricks.sdk.config import Config
-from databricks.sdk.credentials_provider import ConnectStrategy
 from posit import connect
 from shiny import App, Inputs, Outputs, Session, reactive, render, ui
 from shinywidgets import output_widget, render_widget
@@ -48,19 +46,11 @@ def fetch_snowflake(access_token: str) -> pd.DataFrame:
     return df
 
 
-def fetch_databricks(session_token: str, db_audience: str) -> pd.DataFrame:
-    databricks_host = os.environ["DATABRICKS_HOST"]
-    cfg = Config(
-        credentials_strategy=ConnectStrategy(
-            user_session_token=session_token,
-            audience=db_audience,
-        ),
-        host=databricks_host,
-    )
+def fetch_databricks(access_token: str) -> pd.DataFrame:
     conn = dbsql.connect(
-        server_hostname=databricks_host,
+        server_hostname=os.environ["DATABRICKS_HOST"],
         http_path=os.environ["DATABRICKS_HTTP_PATH"],
-        credentials_provider=cfg.authenticate,
+        access_token=access_token,
     )
     try:
         with conn.cursor() as cur:
