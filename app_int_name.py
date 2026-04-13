@@ -189,7 +189,8 @@ def server(i: Inputs, o: Outputs, session: Session):
 
         # Fetch Databricks
         try:
-            df_db = fetch_databricks(session_token, db_audience)
+            db_creds = client.oauth.get_credentials(session_token, audience=db_audience)
+            df_db = fetch_databricks(db_creds["access_token"])
             db_data.set(df_db)
 
             continents = ["All"] + sorted(df_db["continent"].dropna().unique().tolist())
