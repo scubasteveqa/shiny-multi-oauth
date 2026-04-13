@@ -5,12 +5,14 @@ Queries both Snowflake and Databricks via OAuth integrations
 managed by Posit Connect.
 
 Environment variables:
-    SNOWFLAKE_ACCOUNT    - e.g. xy12345.us-east-1
-    SNOWFLAKE_WAREHOUSE  - e.g. DEFAULT_WH
-    SNOWFLAKE_DATABASE   - e.g. STEVEW_TEST_DB
-    SNOWFLAKE_SCHEMA     - e.g. PUBLIC
-    DATABRICKS_HOST      - e.g. rstudio-partner-posit-default.cloud.databricks.com
-    DATABRICKS_HTTP_PATH - e.g. /sql/1.0/warehouses/abc123
+    SNOWFLAKE_ACCOUNT           - e.g. xy12345.us-east-1
+    SNOWFLAKE_WAREHOUSE         - e.g. DEFAULT_WH
+    SNOWFLAKE_DATABASE          - e.g. STEVEW_TEST_DB
+    SNOWFLAKE_SCHEMA            - e.g. PUBLIC
+    DATABRICKS_HOST             - e.g. rstudio-partner-posit-default.cloud.databricks.com
+    DATABRICKS_HTTP_PATH        - e.g. /sql/1.0/warehouses/abc123
+    SNOWFLAKE_INTEGRATION_GUID  - OAuth integration GUID for Snowflake
+    DATABRICKS_INTEGRATION_GUID - OAuth integration GUID for Databricks
 """
 
 import os
@@ -165,12 +167,8 @@ def server(i: Inputs, o: Outputs, session: Session):
             return
 
         client = connect.Client()
-        content = client.content.get()
-        sf_integration = content.associations.find_by(name="Snowflake Sales Dashboard Integration")
-        db_integration = content.associations.find_by(name="Databricks - Bakehouse")
-
-        sf_audience = sf_integration.get("oauth_integration_guid")
-        db_audience = db_integration.get("oauth_integration_guid")
+        sf_audience = os.environ.get("SNOWFLAKE_INTEGRATION_GUID")
+        db_audience = os.environ.get("DATABRICKS_INTEGRATION_GUID")
 
         # Fetch Snowflake
         try:
