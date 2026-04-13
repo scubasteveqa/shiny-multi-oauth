@@ -28,9 +28,9 @@ def fetch_snowflake(access_token: str) -> pd.DataFrame:
         account=os.environ["SNOWFLAKE_ACCOUNT"],
         token=access_token,
         authenticator="oauth",
-        warehouse=os.environ.get("SNOWFLAKE_WAREHOUSE", "DEFAULT_WH"),
-        database=os.environ.get("SNOWFLAKE_DATABASE", "STEVEW_TEST_DB"),
-        schema=os.environ.get("SNOWFLAKE_SCHEMA", "PUBLIC"),
+        warehouse=os.environ["SNOWFLAKE_WAREHOUSE"],
+        database=os.environ["SNOWFLAKE_DATABASE"],
+        schema=os.environ["SNOWFLAKE_SCHEMA"], 
     )
     try:
         df = pd.read_sql("SELECT * FROM SALES", conn)
