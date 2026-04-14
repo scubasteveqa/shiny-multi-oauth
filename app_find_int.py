@@ -1,10 +1,11 @@
 """
 Shiny for Python - Multi-Source Analytics Dashboard
 ====================================================
-Uses client.oauth.integrations.find_by() to discover integration GUIDs
-by name, then passes them as audience to get_credentials().
+Uses content.associations.find_by() to discover integration GUIDs
+by type/name, then passes them as audience to get_credentials().
 
-No extra env vars needed beyond what Connect provides automatically.
+Based on: https://docs.posit.co/connect/user/oauth-integrations/
+  #obtaining-credentials-within-content-associated-with-multiple-integrations
 """
 
 import os
@@ -15,6 +16,7 @@ import plotly.graph_objects as go
 import snowflake.connector
 from databricks import sql as dbsql
 from posit import connect
+from posit.connect.oauth import types
 from shiny import App, Inputs, Outputs, Session, reactive, render, ui
 from shinywidgets import output_widget, render_widget
 
@@ -159,24 +161,25 @@ def server(i: Inputs, o: Outputs, session: Session):
             return
 
         client = connect.Client()
+        current_content = client.content.get()
 
-        # Discover integrations by name — no CONNECT_CONTENT_GUID needed
-        sf_integration = client.oauth.integrations.find_by(
-            name="Snowflake Sales Dashboard Integration"
+        # Discover integrations per docs pattern: content.associations.find_by()
+        sf_assoc = current_content.associations.find_by(
+            integration_type=types.OAuthIntegrationType.SNOWFLAKE
         )
-        db_integration = client.oauth.integrations.find_by(
-            name="Databricks - Bakehouse"
+        db_assoc = current_content.associations.find_by(
+            integration_type=types.OAuthIntegrationType.DATABRICKS
         )
 
-        if sf_integration is None or db_integration is None:
+        if sf_assoc is None or db_assoc is None:
             ui.notification_show(
-                "Could not find one or both integrations by name.",
+                f"Missing association: snowflake={sf_assoc is not None}, databricks={db_assoc is not None}",
                 type="error",
             )
             return
 
-        sf_guid = sf_integration["guid"]
-        db_guid = db_integration["guid"]
+        sf_guid = sf_assoc.get("oauth_integration_guid")
+        db_guid = db_assoc.get("oauth_integration_guid")
 
         # Fetch Snowflake
         try:
