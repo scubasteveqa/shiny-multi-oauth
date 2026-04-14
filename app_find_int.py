@@ -163,11 +163,11 @@ def server(i: Inputs, o: Outputs, session: Session):
         client = connect.Client()
         current_content = client.content.get()
 
-        # Discover integrations per docs pattern: content.associations.find_by()
-        sf_assoc = current_content.associations.find_by(
+        # Discover integrations via content's OAuth associations
+        sf_assoc = current_content.oauth.associations.find_by(
             integration_type=types.OAuthIntegrationType.SNOWFLAKE
         )
-        db_assoc = current_content.associations.find_by(
+        db_assoc = current_content.oauth.associations.find_by(
             integration_type=types.OAuthIntegrationType.DATABRICKS
         )
 
